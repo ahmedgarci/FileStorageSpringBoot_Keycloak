@@ -55,7 +55,7 @@ public class FileService {
     public FilePageResponse<FileResponse> getMySavedFiles(Integer pageNumber, Integer pageSize){
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<FileEntity> fileEntityPage = fRepository.getUserFiles(keyCloakService.getConnectedUser(), pageable);
-        List<FileResponse> fileResponses = fileEntityPage.getContent().stream().map((file)-> new FileResponse(file.getTitle(),file.getFilePath(), file.getMimeType()))
+        List<FileResponse> fileResponses = fileEntityPage.getContent().stream().map((file)-> new FileResponse(file.getId(),file.getTitle(),file.getFilePath(), file.getMimeType()))
             .collect(Collectors.toList());
         return new FilePageResponse<FileResponse>(fileResponses);
     } 

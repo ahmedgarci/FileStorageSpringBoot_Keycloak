@@ -2,6 +2,7 @@ package com.example.FileStorageApp.Keycloack;
 
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,17 @@ public class KeycloakAdminService {
             .build();
     }
 
+    public String getAdminToken(){
+        try {
+            AccessTokenResponse response = authenticateApp().tokenManager().getAccessToken();
+            System.out.println(response);
+            return response.getToken();
+        } catch (Exception e) {
+            throw new RuntimeException("error occured while retrieving the admin token from keycloak");
+        }
+   
+
+    }
 
 
 }

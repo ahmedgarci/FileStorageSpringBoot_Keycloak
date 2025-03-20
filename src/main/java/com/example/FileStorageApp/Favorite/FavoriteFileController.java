@@ -10,8 +10,10 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 
 @RestController
@@ -32,8 +34,12 @@ public class FavoriteFileController {
         favoriteService.removeFavorite(request);        
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    
-        
+   
+    @GetMapping("/all")
+    public ResponseEntity<?> getMyFavoriteFiles() {
+        favoriteService.getMyFavoriteFiles();        
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
     
 

@@ -1,6 +1,7 @@
 package com.example.FileStorageApp.Favorite;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,8 @@ import com.example.FileStorageApp.Handler.Exceptions.CustomUnauthorizedError;
 import com.example.FileStorageApp.Keycloack.KeyCloakService;
 import com.example.FileStorageApp.Requests.Favorite.AddToFavoriteRequest;
 import com.example.FileStorageApp.Requests.Favorite.DeleteFavFileRequest;
+import com.example.FileStorageApp.Responses.FilePageResponse;
+import com.example.FileStorageApp.Responses.FileResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,12 +46,15 @@ public class FavoriteService {
         favRepository.delete(savedFavEntity);
     }
     
-    public List<FavoriteEntity> getMyFavoriteFiles(){
+    public FilePageResponse<FileResponse> getMyFavoriteFiles(){
         String userId = kService.getConnectedUser();
         if(userId == null){
             throw new CustomUnauthorizedError("user not logged in");
         }
-        return favRepository.findByUser(userId);
+        List<FavoriteEntity> userFavoriteFiles =  favRepository.findByUser(userId)  ;
+        List<FileResponse> response = userFavoriteFiles.stream().map((element)->new FileResponse(element.getId(),element.getFavFile().getTitle(),element.getFavFile().getFilePath(),element.getFavFile().getMimeType()))
+        .collect(Collectors.toList());
+        return new FilePageResponse<>(response);
     }
     
 

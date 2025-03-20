@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 
 @RestController
@@ -31,6 +32,14 @@ public class AuthController {
         return new ResponseEntity<>(keyCloakService.LogIn(request),HttpStatus.OK);
     }
     
-    
+    @PostMapping("/logout")
+    public ResponseEntity<String> logoutConnectedUser(@RequestHeader("Authorization") String authorizationHeader) {
+        try {
+            keyCloakService.logout(authorizationHeader);            
+            return ResponseEntity.ok("user logged out successfully");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Logout failed ");
+        }
+    }
 
 }

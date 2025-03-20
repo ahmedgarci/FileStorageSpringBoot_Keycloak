@@ -25,8 +25,8 @@ import org.springframework.web.client.RestTemplate;
 import com.example.FileStorageApp.Handler.Exceptions.CustomInvalidCredentialsException;
 import com.example.FileStorageApp.Requests.Authentication.LoginRequest;
 import com.example.FileStorageApp.Requests.Authentication.RegisterRequest;
-import com.example.FileStorageApp.Responses.ErrorResponse;
 
+import jakarta.ws.rs.POST;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class KeyCloakService {
+
     @Value("${keycloak.realm}")
     private String KEYCLOAKREALM;
     @Value("${keycloak.token-url}")
@@ -43,6 +44,8 @@ public class KeyCloakService {
     private String ClientID;
     @Value("${keycloak.client-secret}")
     private String ClientSecret;
+    @Value("${keycloak.users-url}")
+    private String usersEndpoint;
 
     private final KeycloakAdminService KeycloakAdminService;
     private RestTemplate restTemplate = new RestTemplate();
@@ -61,13 +64,11 @@ public class KeyCloakService {
         if(response.getStatus() == HttpStatus.CREATED.value()){
             log.info("user created successfully");
         }else{
-//            String errorMessage = response.readEntity(String.class);
             throw new CustomInvalidCredentialsException("user exists with the same email ");            
        }
     }
 
     public String LogIn(LoginRequest request){
-        System.out.println("request");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> userCredentials = new LinkedMultiValueMap<>();
@@ -88,6 +89,24 @@ public class KeyCloakService {
         }
         return null;
     }
+
+    public void logout(String authorizationHeader){
+        String userId = getConnectedUser();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization",authorizationHeader);
+        String LOGOUTENDPOINT = String.format("http://localhost:8085/admin/realms/FileStorageAppRealm/users/%s/logout",userId);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        try {  
+            ResponseEntity<HashMap> response = restTemplate.exchange(LOGOUTENDPOINT,HttpMethod.POST,entity,HashMap.class);
+            if(response.getStatusCode().is2xxSuccessful()){
+                SecurityContextHolder.clearContext();
+                System.out.println("logged out");
+            }
+        } catch (Exception e) {
+            log.error("logout failed : ", e);
+        }
+    }
+
 
     public String getConnectedUser(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

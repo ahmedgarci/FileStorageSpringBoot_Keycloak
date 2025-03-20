@@ -1,5 +1,6 @@
 package com.example.FileStorageApp.Handler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.springframework.http.HttpStatus;
@@ -37,10 +38,10 @@ public class GlobalHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public HashMap<String,String> handleFieldValidation(MethodArgumentNotValidException fieldErrors){
-        HashMap<String,String> erros = new HashMap<>();
+    public ArrayList<String> handleFieldValidation(MethodArgumentNotValidException fieldErrors){
+        ArrayList<String> erros = new ArrayList<>();
         for (FieldError error : fieldErrors.getBindingResult().getFieldErrors()) {
-            erros.put(error.getField(),error.getDefaultMessage());            
+            erros.add(error.getDefaultMessage());            
         }
         return erros;
     }    
@@ -51,12 +52,9 @@ public class GlobalHandler {
         return new ErrorResponse(exception.getMessage(),HttpStatus.NOT_FOUND.value());
     }
 
-
     @ExceptionHandler(CustomInvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCredentialsException(CustomInvalidCredentialsException exception){    
         ErrorResponse error = new ErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST.value());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);    
     }
-
-
 }
